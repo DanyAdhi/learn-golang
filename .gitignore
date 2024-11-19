@@ -1,0 +1,22 @@
+# Folder/Files to ignore
+tmp/
+temp/
+*.exe
+*.out
+*.bin
+
+# Go build artifacts
+*.exe
+*.test
+*.so
+*.dll
+
+# IDE/Editor config files
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+
+# Environment files
+.env
