@@ -1,12 +1,14 @@
 package auth
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"log"
 	"time"
 
 	"github.com/DanyAdhi/learn-golang/internal/config"
+	"github.com/DanyAdhi/learn-golang/internal/config/redis"
 	"github.com/DanyAdhi/learn-golang/internal/utils"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -15,6 +17,7 @@ import (
 type Service interface {
 	Login(data RequestLogin) (*ResponseLogin, error)
 	RefreshTokenService(refreshToken string) (*ResponseRefreshToken, error)
+	SignOutService(userId int, token string) error
 }
 
 type service struct {
@@ -28,6 +31,7 @@ func NewService(repo Repository) Service {
 }
 
 var ErrWrongEmailOrPassword = errors.New("wrong email or password")
+var ctx = context.Background()
 
 func (s *service) Login(data RequestLogin) (*ResponseLogin, error) {
 	user, err := s.repo.GetUsersByEmail(data.Email)
@@ -101,12 +105,25 @@ func (s *service) RefreshTokenService(refreshToken string) (*ResponseRefreshToke
 	return result, nil
 }
 
+func (s *service) SignOutService(userId int, token string) error {
+	err := s.repo.RevokeToken(userId)
+	if err != nil {
+		log.Printf("Error revoke token. %v", err)
+		return err
+	}
+
+	redis := redis.Connect()
+	redis.Set(ctx, "expired-"+token, true, time.Minute*10)
+
+	return nil
+}
+
 func generateAccessToken(payload PayloadJwt) (string, error) {
 	secretKey := config.AppConfig.JWT_SECRET_ACCESS_TOKEN
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":   payload.ID,
 		"name": payload.Name,
-		"exp":  time.Now().Add(time.Minute * 1).Unix(),
+		"exp":  time.Now().Add(time.Minute * 10).Unix(),
 		"iat":  time.Now().Unix(),
 	})
 

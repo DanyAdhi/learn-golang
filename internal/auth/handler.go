@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/DanyAdhi/learn-golang/internal/utils"
 )
@@ -38,6 +39,18 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	utils.ResponseSuccess(w, http.StatusOK, "Success", login)
 }
 
+func (h *Handler) SignOutHandler(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value(utils.UserKey).(*utils.JwtDecodeInterface)
+	token := getBearerToken(r)
+
+	err := h.service.SignOutService(user.ID, token)
+	if err != nil {
+		utils.ResponseError(w, http.StatusInternalServerError, "internal server error.")
+		return
+	}
+	utils.ResponseSuccess(w, http.StatusOK, "Success", nil)
+}
+
 func (h *Handler) RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 	var bodyRefreshToken ReqBodyRefreshToken
 
@@ -53,4 +66,13 @@ func (h *Handler) RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	utils.ResponseSuccess(w, http.StatusOK, "success", refreshToken)
+}
+
+func getBearerToken(r *http.Request) string {
+	authorization := r.Header.Get("Authorization")
+	if authorization == "" || !strings.Contains(authorization, "Bearer") {
+		return ""
+	}
+	token := strings.Split(authorization, " ")[1]
+	return token
 }

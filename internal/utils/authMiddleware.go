@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/DanyAdhi/learn-golang/internal/config"
+	"github.com/DanyAdhi/learn-golang/internal/config/redis"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -21,7 +22,7 @@ type JwtDecodeInterface struct {
 
 type contextKey string
 
-const userKey contextKey = "user"
+var UserKey contextKey = "user"
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(
@@ -42,7 +43,14 @@ func AuthMiddleware(next http.Handler) http.Handler {
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), userKey, decode)
+			checkExpired := checkTokenExpiredOnRedis(token)
+			if checkExpired {
+				log.Print("Token already logout")
+				ResponseError(w, http.StatusUnauthorized, "Unauthorized")
+				return
+			}
+
+			ctx := context.WithValue(r.Context(), UserKey, decode)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		},
@@ -77,4 +85,10 @@ func verifyAccessToken(tokenString string) (*JwtDecodeInterface, error) {
 	}
 
 	return claims, nil
+}
+
+func checkTokenExpiredOnRedis(token string) bool {
+	redis := redis.Connect()
+	checkExpired := redis.Get(context.Background(), "expired-"+token).Val()
+	return checkExpired == "1"
 }

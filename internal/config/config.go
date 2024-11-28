@@ -16,6 +16,9 @@ type Config struct {
 	DB_SSLMODE               string
 	JWT_SECRET_ACCESS_TOKEN  string
 	JWT_SECRET_REFRESH_TOKEN string
+	REDIS_HOST               string
+	REDIS_PASSWORD           string
+	REDIS_PORT               string
 }
 
 var AppConfig Config
@@ -35,6 +38,9 @@ func LoadConfig() {
 		DB_SSLMODE:               os.Getenv("DB_SSLMODE"),
 		JWT_SECRET_ACCESS_TOKEN:  os.Getenv("JWT_SECRET_ACCESS_TOKEN"),
 		JWT_SECRET_REFRESH_TOKEN: os.Getenv("JWT_SECRET_REFRESH_TOKEN"),
+		REDIS_HOST:               os.Getenv("REDIS_HOST"),
+		REDIS_PASSWORD:           os.Getenv("REDIS_PASSWORD"),
+		REDIS_PORT:               os.Getenv("REDIS_PORT"),
 	}
 
 }

@@ -9,6 +9,7 @@ type Repository interface {
 	GetUsersByEmail(email string) (*User, error)
 	StoreRefreshToken(userId int, refreshToken string) error
 	GetRefreshToken(refreshToken string) (*GetRefreshToken, error)
+	RevokeToken(userId int) error
 }
 
 type repository struct {
@@ -69,4 +70,12 @@ func (r *repository) GetRefreshToken(refreshToken string) (*GetRefreshToken, err
 		return nil, err
 	}
 	return &dataRefreshToken, nil
+}
+
+func (r *repository) RevokeToken(userId int) error {
+	_, err := r.db.Exec(`UPDATE refresh_tokens SET is_revoked = $1 WHERE user_id = $2`, true, userId)
+	if err != nil {
+		return err
+	}
+	return nil
 }
