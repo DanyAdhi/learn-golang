@@ -32,7 +32,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 				return
 			}
 
-			decode, err := verifyToken(token)
+			decode, err := verifyAccessToken(token)
 			if err == jwt.ErrTokenExpired {
 				ResponseError(w, http.StatusUnauthorized, "Token expired")
 				return
@@ -58,13 +58,13 @@ func getBearerToken(r *http.Request) string {
 	return token
 }
 
-func verifyToken(tokenString string) (*JwtDecodeInterface, error) {
+func verifyAccessToken(tokenString string) (*JwtDecodeInterface, error) {
 	claims := &JwtDecodeInterface{}
 	_, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
 		if t.Method != jwt.SigningMethodHS256 {
 			return nil, ErrUnexpectedSigningMethod
 		}
-		return []byte(config.AppConfig.JWT_SECRET), nil
+		return []byte(config.AppConfig.JWT_SECRET_ACCESS_TOKEN), nil
 	})
 
 	if errors.Is(err, jwt.ErrTokenExpired) {
