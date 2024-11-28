@@ -5,9 +5,9 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 
+	"github.com/DanyAdhi/learn-golang/internal/config"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -59,14 +59,12 @@ func getBearerToken(r *http.Request) string {
 }
 
 func verifyToken(tokenString string) (*JwtDecodeInterface, error) {
-	secretKey := os.Getenv("JWT_SECRET")
-
 	claims := &JwtDecodeInterface{}
 	_, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
 		if t.Method != jwt.SigningMethodHS256 {
 			return nil, ErrUnexpectedSigningMethod
 		}
-		return []byte(secretKey), nil
+		return []byte(config.AppConfig.JWT_SECRET), nil
 	})
 
 	if errors.Is(err, jwt.ErrTokenExpired) {

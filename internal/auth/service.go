@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"errors"
 	"log"
-	"os"
 	"time"
 
+	"github.com/DanyAdhi/learn-golang/internal/config"
 	"github.com/DanyAdhi/learn-golang/internal/utils"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -102,7 +102,7 @@ func (s *service) RefreshTokenService(refreshToken string) (*ResponseRefreshToke
 }
 
 func generateAccessToken(payload PayloadJwt) (string, error) {
-	secretKey := os.Getenv("JWT_SECRET")
+	secretKey := config.AppConfig.JWT_SECRET
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":   payload.ID,
 		"name": payload.Name,
@@ -120,7 +120,7 @@ func generateAccessToken(payload PayloadJwt) (string, error) {
 }
 
 func generateRefreshToken(id int) (string, error) {
-	secretKey := os.Getenv("JWT_SECRET")
+	secretKey := config.AppConfig.JWT_SECRET
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":  id,
@@ -137,7 +137,7 @@ func generateRefreshToken(id int) (string, error) {
 }
 
 func verifyRefreshToken(tokenString string) error {
-	secretKey := os.Getenv("JWT_SECRET")
+	secretKey := config.AppConfig.JWT_SECRET
 
 	_, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 		if t.Method != jwt.SigningMethodHS256 {

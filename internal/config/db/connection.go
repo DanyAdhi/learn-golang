@@ -4,17 +4,18 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
+
+	"github.com/DanyAdhi/learn-golang/internal/config"
 )
 
 func Connect() (*sql.DB, error) {
 	dbConnStr := fmt.Sprintf(
 		`user=%s password=%s dbname=%s port=%s sslmode=%s`,
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_NAME"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_SSLMODE"),
+		config.AppConfig.DB_USER,
+		config.AppConfig.DB_PASSWORD,
+		config.AppConfig.DB_NAME,
+		config.AppConfig.DB_PORT,
+		config.AppConfig.DB_SSLMODE,
 	)
 
 	db, err := sql.Open("postgres", dbConnStr)
