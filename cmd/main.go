@@ -6,7 +6,7 @@ import (
 
 	"github.com/DanyAdhi/learn-golang/internal/config"
 	"github.com/DanyAdhi/learn-golang/internal/config/db"
-	"github.com/DanyAdhi/learn-golang/internal/config/routes"
+	"github.com/DanyAdhi/learn-golang/internal/routes"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq" // Driver PostgreSQL
 )
