@@ -39,7 +39,15 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) RefreshTokenHandler(w http.ResponseWriter, r *http.Request) {
-	refreshToken, err := h.service.RefreshTokenService("refreshtoken")
+	var bodyRefreshToken ReqBodyRefreshToken
+
+	err := json.NewDecoder(r.Body).Decode(&bodyRefreshToken)
+	if err != nil {
+		utils.ResponseError(w, http.StatusInternalServerError, "Failed get data body")
+		return
+	}
+
+	refreshToken, err := h.service.RefreshTokenService(bodyRefreshToken.Refresh_token)
 	if err != nil {
 		utils.ResponseError(w, http.StatusInternalServerError, "Failed generate token")
 		return

@@ -24,6 +24,10 @@ type PayloadJwt struct {
 	Name string `json:"name"`
 }
 
+type ReqBodyRefreshToken struct {
+	Refresh_token string `json:"refresh_token"`
+}
+
 type ResponseRefreshToken struct {
 	Access_token string `json:"access_token"`
 }

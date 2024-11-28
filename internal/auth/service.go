@@ -143,10 +143,10 @@ func verifyRefreshToken(tokenString string) error {
 		if t.Method != jwt.SigningMethodHS256 {
 			return nil, utils.ErrUnexpectedSigningMethod
 		}
-
 		return []byte(secretKey), nil
 	})
 	if err != nil {
+		log.Printf("Error verify refresh tokenssss %v", err)
 		return err
 	}
 
