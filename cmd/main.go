@@ -10,6 +10,7 @@ import (
 	"github.com/DanyAdhi/learn-golang/internal/utils"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq" // Driver PostgreSQL
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -29,6 +30,15 @@ func main() {
 	routes.SetupAuthRouter(router, database)
 	routes.SetupUserRouter(router, database)
 
+	corsMiddleware := cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"}, // Ubah sesuai domain front-end Anda
+		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
+	})
+
+	handler := corsMiddleware.Handler(router)
+
 	// run server
 	port := config.AppConfig.APP_PORT
 	if port == "" {
@@ -36,5 +46,5 @@ func main() {
 	}
 
 	log.Println("Server running on port " + port)
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	log.Fatal(http.ListenAndServe(":"+port, handler))
 }
