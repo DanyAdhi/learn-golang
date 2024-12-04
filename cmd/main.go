@@ -7,6 +7,7 @@ import (
 	"github.com/DanyAdhi/learn-golang/internal/config"
 	"github.com/DanyAdhi/learn-golang/internal/config/db"
 	"github.com/DanyAdhi/learn-golang/internal/routes"
+	"github.com/DanyAdhi/learn-golang/internal/utils"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq" // Driver PostgreSQL
 )
@@ -22,6 +23,7 @@ func main() {
 	defer database.Close()
 
 	router := mux.NewRouter()
+	router.Use(utils.LoggingMiddleware)
 
 	// Setup user module
 	routes.SetupAuthRouter(router, database)
