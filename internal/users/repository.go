@@ -6,7 +6,7 @@ import (
 )
 
 type Repository interface {
-	GetAllUsersRepository() (*[]User, error)
+	GetAllUsersRepository(params GetAllUsersParmas) (*[]User, int, error)
 	GetOneUsersRepository(id int) (*User, error)
 	StoreUsersRepository(user *Createuser, password string) error
 	CheckEmailExists(email string) (bool, error)
@@ -22,11 +22,24 @@ func NewRepository(db *sql.DB) Repository {
 	return &repository{db: db}
 }
 
-func (r *repository) GetAllUsersRepository() (*[]User, error) {
-	rows, err := r.db.Query("SELECT id, name, email, address, gender FROM users ORDER BY id DESC LIMIT 10")
+func (r *repository) GetAllUsersRepository(p GetAllUsersParmas) (*[]User, int, error) {
+
+	var totalRecords int
+	err := r.db.QueryRow(`SELECT COUNT(*) FROM users`).Scan(&totalRecords)
+	if err != nil {
+		log.Printf("Error get total records user. %v", err)
+		return nil, 0, err
+	}
+
+	offset := (p.Page - 1) * p.Limit
+
+	rows, err := r.db.Query(
+		`SELECT id, name, email, address, gender FROM users ORDER BY id DESC LIMIT $1 OFFSET $2`,
+		p.Limit, offset,
+	)
 	if err != nil {
 		log.Printf("Error get data user: %v", err)
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -36,12 +49,12 @@ func (r *repository) GetAllUsersRepository() (*[]User, error) {
 		err := rows.Scan(&dataUser.ID, &dataUser.Name, &dataUser.Email, &dataUser.Address, &dataUser.Gender)
 		if err != nil {
 			log.Printf("Row scan error: %v", err)
-			return nil, err
+			return nil, 0, err
 		}
 		users = append(users, dataUser)
 	}
 
-	return &users, nil
+	return &users, totalRecords, nil
 }
 
 func (r *repository) GetOneUsersRepository(id int) (*User, error) {

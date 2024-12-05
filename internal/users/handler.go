@@ -19,12 +19,28 @@ func NewHandler(service Service) *Handler {
 }
 
 func (h *Handler) GetAllUsersHandler(w http.ResponseWriter, r *http.Request) {
-	users, err := h.service.GetAllUsersService()
+
+	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	search := r.URL.Query().Get("search")
+	if limit <= 0 {
+		limit = 10
+	}
+	if page <= 0 {
+		page = 1
+	}
+
+	params := GetAllUsersParmas{
+		Search: search,
+		Limit:  limit,
+		Page:   page,
+	}
+	data, err := h.service.GetAllUsersService(params)
 	if err != nil {
 		utils.ResponseError(w, http.StatusInternalServerError, "Failed get data users")
 		return
 	}
-	utils.ResponseSuccess(w, http.StatusOK, "OK", users)
+	utils.ResponseSuccessPagination(w, http.StatusOK, "OK", data.Users, *data.Pagination)
 }
 
 func (h *Handler) GetOneUsersHandler(w http.ResponseWriter, r *http.Request) {

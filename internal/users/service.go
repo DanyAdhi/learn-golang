@@ -5,11 +5,12 @@ import (
 	"errors"
 	"log"
 
+	"github.com/DanyAdhi/learn-golang/internal/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Service interface {
-	GetAllUsersService() (*[]User, error)
+	GetAllUsersService(params GetAllUsersParmas) (*GetAllUsersResponse, error)
 	GetOneUsersService(id int) (*User, error)
 	CreateUsersService(user *Createuser) error
 	UpdateUsersService(id int, user *UpdateUser) error
@@ -30,13 +31,21 @@ var ErrEmailAlreadyExists = errors.New("email already exists")
 var ErrGeneratePassword = errors.New("failed generate password")
 var ErrUserNotFound = errors.New("user not found")
 
-func (s *service) GetAllUsersService() (*[]User, error) {
-	users, err := s.repo.GetAllUsersRepository()
+func (s *service) GetAllUsersService(p GetAllUsersParmas) (*GetAllUsersResponse, error) {
+	users, totalRecords, err := s.repo.GetAllUsersRepository(p)
 	if err != nil {
 		log.Printf("Error get user from repository. %v", err)
 		return nil, err
 	}
-	return users, nil
+
+	pagination := utils.GeneratePagination(p.Limit, p.Page, totalRecords)
+
+	response := &GetAllUsersResponse{
+		Users:      users,
+		Pagination: pagination,
+	}
+
+	return response, nil
 }
 
 func (s *service) GetOneUsersService(id int) (*User, error) {
