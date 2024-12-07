@@ -34,7 +34,7 @@ func (r *repository) GetAllUsersRepository(p GetAllUsersParmas) (*[]User, int, e
 	offset := (p.Page - 1) * p.Limit
 
 	rows, err := r.db.Query(
-		`SELECT id, name, email, address, gender FROM users ORDER BY id DESC LIMIT $1 OFFSET $2`,
+		`SELECT id, name, email, address, gender, status FROM users ORDER BY id DESC LIMIT $1 OFFSET $2`,
 		p.Limit, offset,
 	)
 	if err != nil {
@@ -46,7 +46,7 @@ func (r *repository) GetAllUsersRepository(p GetAllUsersParmas) (*[]User, int, e
 	var users []User
 	for rows.Next() {
 		var dataUser User
-		err := rows.Scan(&dataUser.ID, &dataUser.Name, &dataUser.Email, &dataUser.Address, &dataUser.Gender)
+		err := rows.Scan(&dataUser.ID, &dataUser.Name, &dataUser.Email, &dataUser.Address, &dataUser.Gender, &dataUser.Status)
 		if err != nil {
 			log.Printf("Row scan error: %v", err)
 			return nil, 0, err
@@ -58,10 +58,10 @@ func (r *repository) GetAllUsersRepository(p GetAllUsersParmas) (*[]User, int, e
 }
 
 func (r *repository) GetOneUsersRepository(id int) (*User, error) {
-	row := r.db.QueryRow(`SELECT id, name, email, address, gender FROM users WHERE id = $1`, id)
+	row := r.db.QueryRow(`SELECT id, name, email, address, gender, status, createdat FROM users WHERE id = $1`, id)
 
 	var user User
-	err := row.Scan(&user.ID, &user.Name, &user.Email, &user.Address, &user.Gender)
+	err := row.Scan(&user.ID, &user.Name, &user.Email, &user.Address, &user.Gender, &user.Status, &user.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
