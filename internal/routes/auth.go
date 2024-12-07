@@ -14,7 +14,7 @@ func SetupAuthRouter(router *mux.Router, db *sql.DB) *mux.Router {
 	authService := auth.NewService(authRepo)
 	authHandler := auth.NewHandler(authService)
 
-	router.HandleFunc("/sign-in", authHandler.LoginHandler).Methods(http.MethodPost)
+	router.HandleFunc("/sign-in", authHandler.SignInHandler).Methods(http.MethodPost)
 	router.HandleFunc("/refresh-token", authHandler.RefreshTokenHandler).Methods(http.MethodPost)
 	router.Handle("/sign-out", utils.AuthMiddleware(http.HandlerFunc(authHandler.SignOutHandler))).Methods(http.MethodPost)
 

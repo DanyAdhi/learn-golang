@@ -2,12 +2,12 @@ package auth
 
 import "time"
 
-type RequestLogin struct {
+type RequestSignIn struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-type ResponseLogin struct {
+type ResponseSignIn struct {
 	Access_token  string `json:"access_token"`
 	Refresh_token string `json:"refresh_token"`
 }

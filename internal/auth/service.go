@@ -15,7 +15,7 @@ import (
 )
 
 type Service interface {
-	Login(data RequestLogin) (*ResponseLogin, error)
+	SignIn(data RequestSignIn) (*ResponseSignIn, error)
 	RefreshTokenService(refreshToken string) (*ResponseRefreshToken, error)
 	SignOutService(userId int, token string) error
 }
@@ -33,7 +33,7 @@ func NewService(repo Repository) Service {
 var ErrWrongEmailOrPassword = errors.New("wrong email or password")
 var ctx = context.Background()
 
-func (s *service) Login(data RequestLogin) (*ResponseLogin, error) {
+func (s *service) SignIn(data RequestSignIn) (*ResponseSignIn, error) {
 	user, err := s.repo.GetUsersByEmail(data.Email)
 	if err == sql.ErrNoRows {
 		return nil, ErrWrongEmailOrPassword
@@ -68,7 +68,7 @@ func (s *service) Login(data RequestLogin) (*ResponseLogin, error) {
 		return nil, err
 	}
 
-	response := &ResponseLogin{
+	response := &ResponseSignIn{
 		Access_token:  access_token,
 		Refresh_token: refresh_token,
 	}

@@ -17,8 +17,8 @@ func NewHandler(service Service) *Handler {
 	return &Handler{service: service}
 }
 
-func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	var data RequestLogin
+func (h *Handler) SignInHandler(w http.ResponseWriter, r *http.Request) {
+	var data RequestSignIn
 	err := json.NewDecoder(r.Body).Decode(&data)
 	if err != nil {
 		log.Printf(`Error get body %v`, err)
@@ -26,7 +26,7 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	login, err := h.service.Login(data)
+	signIn, err := h.service.SignIn(data)
 	if err != nil {
 		if err == ErrWrongEmailOrPassword {
 			utils.ResponseError(w, http.StatusBadRequest, "Email or Password wrong.")
@@ -36,7 +36,7 @@ func (h *Handler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.ResponseSuccess(w, http.StatusOK, "Success", login)
+	utils.ResponseSuccess(w, http.StatusOK, "Success", signIn)
 }
 
 func (h *Handler) SignOutHandler(w http.ResponseWriter, r *http.Request) {
