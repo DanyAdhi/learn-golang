@@ -9,29 +9,51 @@ import (
 
 	"github.com/DanyAdhi/learn-golang/internal/config"
 	"github.com/DanyAdhi/learn-golang/internal/config/redis"
+	"github.com/DanyAdhi/learn-golang/internal/users"
 	"github.com/DanyAdhi/learn-golang/internal/utils"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Service interface {
+	SignUpService(user *UserSignUp) error
 	SignIn(data RequestSignIn) (*ResponseSignIn, error)
 	RefreshTokenService(refreshToken string) (*ResponseRefreshToken, error)
 	SignOutService(userId int, token string) error
 }
 
 type service struct {
-	repo Repository
+	repo     Repository
+	userRepo users.Repository
 }
 
-func NewService(repo Repository) Service {
+func NewService(repo Repository, userRepo users.Repository) Service {
 	return &service{
-		repo: repo,
+		repo:     repo,
+		userRepo: userRepo,
 	}
 }
 
 var ErrWrongEmailOrPassword = errors.New("wrong email or password")
+var ErrEmailAlreadyExist = errors.New("email already exist")
 var ctx = context.Background()
+
+func (s service) SignUpService(data *UserSignUp) error {
+	user, err := s.userRepo.CheckEmailExists(data.Email)
+	if err != nil {
+		return err
+	}
+	if user {
+		return ErrEmailAlreadyExist
+	}
+
+	err = s.repo.StoreUsersSignUpRepository(data)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func (s *service) SignIn(data RequestSignIn) (*ResponseSignIn, error) {
 	user, err := s.repo.GetUsersByEmail(data.Email)

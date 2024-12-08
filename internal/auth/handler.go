@@ -17,6 +17,36 @@ func NewHandler(service Service) *Handler {
 	return &Handler{service: service}
 }
 
+func (h Handler) SignUpHandler(w http.ResponseWriter, r *http.Request) {
+	var user *UserSignUp
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		log.Print("error body")
+		utils.ResponseError(w, http.StatusBadRequest, "Error get body")
+		return
+	}
+
+	message, err := utils.Validator(user)
+	if err != nil {
+		utils.ResponseError(w, http.StatusBadRequest, message)
+		return
+	}
+
+	err = h.service.SignUpService(user)
+	if err == ErrEmailAlreadyExist {
+		log.Printf("error body %v", err)
+
+		utils.ResponseError(w, http.StatusBadRequest, "Email already exist")
+		return
+	}
+	if err != nil {
+		utils.ResponseError(w, http.StatusInternalServerError, "Internal server error")
+		return
+	}
+
+	utils.ResponseSuccess(w, http.StatusCreated, "Success", nil)
+}
+
 func (h *Handler) SignInHandler(w http.ResponseWriter, r *http.Request) {
 	var data RequestSignIn
 	err := json.NewDecoder(r.Body).Decode(&data)

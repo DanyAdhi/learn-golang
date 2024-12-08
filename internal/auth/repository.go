@@ -6,6 +6,7 @@ import (
 )
 
 type Repository interface {
+	StoreUsersSignUpRepository(user *UserSignUp) error
 	GetUsersByEmail(email string) (*User, error)
 	StoreRefreshToken(userId int, refreshToken string) error
 	GetRefreshToken(refreshToken string) (*GetRefreshToken, error)
@@ -18,6 +19,16 @@ type repository struct {
 
 func NewRepository(db *sql.DB) Repository {
 	return &repository{db: db}
+}
+
+func (r *repository) StoreUsersSignUpRepository(user *UserSignUp) error {
+	_, err := r.db.Exec(
+		`INSERT INTO users (name, email, password) VALUES ($1, $2, $3)`,
+		user.Name, user.Email, user.Password)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *repository) GetUsersByEmail(email string) (*User, error) {
