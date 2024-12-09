@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/DanyAdhi/learn-golang/internal/utils"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type Service interface {
@@ -71,7 +70,7 @@ func (s *service) CreateUsersService(user *Createuser) error {
 		return ErrEmailAlreadyExists
 	}
 
-	password, err := hashPassword("password")
+	password, err := utils.BcryptHashPassword("password")
 	if err != nil {
 		log.Printf("error generate password. %v", err)
 		return ErrGeneratePassword
@@ -108,13 +107,4 @@ func (s *service) DeleteUsersService(id int) error {
 		return err
 	}
 	return nil
-}
-
-func hashPassword(pasword string) (string, error) {
-	hashPassword, err := bcrypt.GenerateFromPassword([]byte(pasword), 10)
-	if err != nil {
-		log.Printf("Error hash password. %v", err)
-		return "", err
-	}
-	return string(hashPassword), nil
 }

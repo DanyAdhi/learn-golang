@@ -12,7 +12,6 @@ import (
 	"github.com/DanyAdhi/learn-golang/internal/users"
 	"github.com/DanyAdhi/learn-golang/internal/utils"
 	"github.com/golang-jwt/jwt/v5"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type Service interface {
@@ -47,6 +46,12 @@ func (s service) SignUpService(data *UserSignUp) error {
 		return ErrEmailAlreadyExist
 	}
 
+	hashPassword, err := utils.BcryptHashPassword(data.Password)
+	if err != nil {
+		return err
+	}
+	data.Password = hashPassword
+
 	err = s.repo.StoreUsersSignUpRepository(data)
 	if err != nil {
 		return err
@@ -65,7 +70,7 @@ func (s *service) SignIn(data RequestSignIn) (*ResponseSignIn, error) {
 		return nil, err
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(data.Password))
+	err = utils.CompareHashAndPassword(user.Password, data.Password)
 	if err != nil {
 		return nil, ErrWrongEmailOrPassword
 	}
