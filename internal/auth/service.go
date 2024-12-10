@@ -7,11 +7,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/DanyAdhi/learn-golang/internal/config"
 	"github.com/DanyAdhi/learn-golang/internal/config/redis"
 	"github.com/DanyAdhi/learn-golang/internal/users"
 	"github.com/DanyAdhi/learn-golang/internal/utils"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 type Service interface {
@@ -75,16 +73,16 @@ func (s *service) SignIn(data RequestSignIn) (*ResponseSignIn, error) {
 		return nil, ErrWrongEmailOrPassword
 	}
 
-	payload := PayloadJwt{
+	payload := utils.PayloadJwt{
 		ID:   user.ID,
 		Name: user.Name,
 	}
 
-	access_token, err := generateAccessToken(payload)
+	access_token, err := utils.GenerateAccessToken(payload)
 	if err != nil {
 		return nil, err
 	}
-	refresh_token, err := generateRefreshToken(user.ID)
+	refresh_token, err := utils.GenerateRefreshToken(user.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +102,7 @@ func (s *service) SignIn(data RequestSignIn) (*ResponseSignIn, error) {
 }
 
 func (s *service) RefreshTokenService(refreshToken string) (*ResponseRefreshToken, error) {
-	err := verifyRefreshToken(refreshToken)
+	err := utils.VerifyRefreshToken(refreshToken)
 	if err != nil {
 		return nil, err
 	}
@@ -116,11 +114,11 @@ func (s *service) RefreshTokenService(refreshToken string) (*ResponseRefreshToke
 	}
 
 	// generate new access token
-	payload := PayloadJwt{
+	payload := utils.PayloadJwt{
 		ID:   data.User_id,
 		Name: data.Name,
 	}
-	accessToken, err := generateAccessToken(payload)
+	accessToken, err := utils.GenerateAccessToken(payload)
 	if err != nil {
 		return nil, err
 	}
@@ -141,58 +139,6 @@ func (s *service) SignOutService(userId int, token string) error {
 
 	redis := redis.Connect()
 	redis.Set(ctx, "expired-"+token, true, time.Minute*10)
-
-	return nil
-}
-
-func generateAccessToken(payload PayloadJwt) (string, error) {
-	secretKey := config.AppConfig.JWT_SECRET_ACCESS_TOKEN
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":   payload.ID,
-		"name": payload.Name,
-		"exp":  time.Now().Add(time.Minute * 10).Unix(),
-		"iat":  time.Now().Unix(),
-	})
-
-	tokenString, err := token.SignedString([]byte(secretKey))
-	if err != nil {
-		log.Printf("Failed genrerate access token. %v", err)
-		return "", err
-	}
-
-	return tokenString, nil
-}
-
-func generateRefreshToken(id int) (string, error) {
-	secretKey := config.AppConfig.JWT_SECRET_REFRESH_TOKEN
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":  id,
-		"exp": time.Now().Add(time.Hour * 730).Unix(),
-		"iat": time.Now().Unix(),
-	})
-
-	tokenString, err := token.SignedString([]byte(secretKey))
-	if err != nil {
-		log.Printf("Failed generate refresh token. %v", err)
-		return "", err
-	}
-	return tokenString, nil
-}
-
-func verifyRefreshToken(tokenString string) error {
-	secretKey := config.AppConfig.JWT_SECRET_REFRESH_TOKEN
-
-	_, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
-		if t.Method != jwt.SigningMethodHS256 {
-			return nil, utils.ErrUnexpectedSigningMethod
-		}
-		return []byte(secretKey), nil
-	})
-	if err != nil {
-		log.Printf("Error verify refresh tokenssss %v", err)
-		return err
-	}
 
 	return nil
 }

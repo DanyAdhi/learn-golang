@@ -27,11 +27,6 @@ type User struct {
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 }
 
-type PayloadJwt struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-}
-
 type ReqBodyRefreshToken struct {
 	Refresh_token string `json:"refresh_token"`
 }
