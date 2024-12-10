@@ -126,6 +126,15 @@ func (h *Handler) UpdateUsersHandler(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) DeleteusersHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	log.Printf("Vars %v", vars)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		utils.ResponseError(w, http.StatusBadRequest, "Id not valid.")
+		return
+	}
+	err = h.service.DeleteUsersService(id)
+	if err != nil {
+		utils.ResponseError(w, http.StatusInternalServerError, "Failed delete user")
+		return
+	}
 	utils.ResponseSuccess(w, http.StatusOK, "Success", nil)
 }
