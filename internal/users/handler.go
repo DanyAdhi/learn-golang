@@ -72,6 +72,12 @@ func (h *Handler) CreateUsersHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	message, err := utils.Validator(user)
+	if err != nil {
+		utils.ResponseError(w, http.StatusBadRequest, message)
+		return
+	}
+
 	err = h.service.CreateUsersService(&user)
 	if err == ErrEmailAlreadyExists {
 		utils.ResponseError(w, http.StatusBadRequest, "Email already exists")

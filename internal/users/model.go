@@ -17,10 +17,11 @@ type User struct {
 }
 
 type Createuser struct {
-	Name    string `json:"name"`
-	Email   string `json:"email"`
-	Address string `json:"address"`
-	Gender  string `json:"gender"`
+	Name    string `json:"name" validate:"required,min=3,alphaSpace"`
+	Email   string `json:"email" validate:"required,email"`
+	Address string `json:"address" validate:""`
+	Gender  string `json:"gender" validate:"required,oneof=male female"`
+	Status  string `json:"status" validate:"required,oneof=active inactive"`
 }
 
 type UpdateUser struct {
