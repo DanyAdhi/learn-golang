@@ -32,6 +32,7 @@ func main() {
 	// Setup user module
 	routes.SetupAuthRouter(router, database)
 	routes.SetupUserRouter(router, database)
+	routes.SetupProfileRouter(router, database)
 
 	corsMiddleware := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"}, // Ubah sesuai domain front-end Anda
