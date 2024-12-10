@@ -6,6 +6,7 @@ import (
 
 	"github.com/DanyAdhi/learn-golang/internal/config"
 	"github.com/DanyAdhi/learn-golang/internal/config/db"
+	"github.com/DanyAdhi/learn-golang/internal/config/validator"
 	"github.com/DanyAdhi/learn-golang/internal/routes"
 	"github.com/DanyAdhi/learn-golang/internal/utils"
 	"github.com/gorilla/mux"
@@ -14,6 +15,8 @@ import (
 )
 
 func main() {
+	validator.InitValidator()
+
 	config.LoadConfig()
 
 	// Koneksi ke database
