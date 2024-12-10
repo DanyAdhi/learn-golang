@@ -5,12 +5,13 @@ import (
 	"log"
 	"strings"
 
+	configValidator "github.com/DanyAdhi/learn-golang/internal/config/validator"
 	"github.com/go-playground/validator/v10"
 )
 
 func Validator(data any) (string, error) {
 
-	validate := validator.New()
+	validate := configValidator.Validate
 	err := validate.Struct(data)
 	if err != nil {
 		validationErrors := err.(validator.ValidationErrors)
@@ -33,11 +34,14 @@ func getCustomErrorMessage(err validator.FieldError) string {
 }
 
 var validationMessages = map[string]string{
-	"required": "%s is required",
-	"min":      "%s length must be at least %s characters",
-	"max":      "%s length must be less than or equal to %s characters",
-	"email":    "%s must be a valid email",
-	"alpha":    "%s must only contain alpha characters",
+	"required":          "%s is required",
+	"min":               "%s length must be at least %s characters",
+	"max":               "%s length must be less than or equal to %s characters",
+	"email":             "%s must be a valid email",
+	"alpha":             "%s must only contain alpha characters",
+	"alphaSpace":        "%s must only contain alpha characters and space",
+	"alphanumericSpace": "%s must only contain alphanumeric characters and space",
+	"oneof":             "%s must be one of %s",
 }
 
 // handle singel of multiple params
